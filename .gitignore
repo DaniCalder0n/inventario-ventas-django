@@ -1,0 +1,22 @@
+# Entornos virtuales
+venv/
+venv312/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Variables de entorno
+.env
+
+# Django
+media/
+staticfiles/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
