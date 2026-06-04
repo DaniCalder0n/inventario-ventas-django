@@ -65,8 +65,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'inventario_db',
-        'USER': 'daniela',
-        'PASSWORD': 'tu_password_local',
+        'USER': 'postgres',
+        'PASSWORD': 123456789,
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
