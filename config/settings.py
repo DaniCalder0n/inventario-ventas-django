@@ -1,3 +1,4 @@
+import dj_database_url
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -63,13 +64,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'inventario_db'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'NAME': 'inventario_db',
+        'USER': 'daniela',
+        'PASSWORD': 'tu_password_local',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
+
+# Si Render nos da una base de datos en producción, la usamos automáticamente
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 LOGIN_URL = '/accounts/login/'
