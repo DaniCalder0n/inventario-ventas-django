@@ -1,0 +1,30 @@
+:root {
+  --brand-orange: #FD7B03;
+  --brand-green: #4BA609;
+}
+
+body { background: #f8f9fa; }
+
+.navbar-nav .nav-link:hover { color: var(--brand-orange) !important; }
+
+.btn-brand-orange { background: var(--brand-orange); color: #fff; border: none; }
+.btn-brand-orange:hover { background: #e06000; color: #fff; }
+
+.card { border-radius: 12px; }
+
+.table th { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+
+.badge { font-weight: 500; }
+
+input.form-control:focus, select.form-select:focus, textarea.form-control:focus {
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 0.2rem rgba(253,123,3,.15);
+}
+
+.page-link.active, .page-item.active .page-link {
+  background-color: var(--brand-orange);
+  border-color: var(--brand-orange);
+}
+
+/* Alertas stock */
+.stock-critical { background: #fff3cd; border-left: 4px solid #ffc107; }

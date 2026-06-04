@@ -1,0 +1,35 @@
+{% extends 'partials/base.html' %}
+{% block title %}Iniciar Sesión{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <h2 style="color:#FD7B03;"><i class="bi bi-box-seam"></i> InvStock</h2>
+          <p class="text-muted">Ingresa a tu cuenta</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-medium">Usuario</label>
+            {{ form.username }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-medium">Contraseña</label>
+            {{ form.password }}
+          </div>
+          {% if form.errors %}
+          <div class="alert alert-danger py-2"><small>Usuario o contraseña incorrectos.</small></div>
+          {% endif %}
+          <button type="submit" class="btn w-100 text-white fw-bold" style="background:#FD7B03;">Iniciar Sesión</button>
+        </form>
+        <div class="text-center mt-3">
+          <a href="{% url 'password_reset' %}" class="text-muted small">¿Olvidaste tu contraseña?</a>
+          <br><a href="{% url 'register' %}" class="small" style="color:#4BA609;">Crear cuenta nueva</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

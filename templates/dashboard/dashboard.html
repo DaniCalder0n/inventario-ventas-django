@@ -1,0 +1,138 @@
+{% extends 'partials/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0"><i class="bi bi-speedometer2"></i> Dashboard</h4>
+  <span class="text-muted small">{{ request.user.get_full_name }}</span>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #FD7B03!important;">
+      <div class="card-body">
+        <div class="text-muted small">Total Productos</div>
+        <div class="fs-3 fw-bold" style="color:#FD7B03;">{{ total_products }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #4BA609!important;">
+      <div class="card-body">
+        <div class="text-muted small">Ventas del Mes</div>
+        <div class="fs-3 fw-bold" style="color:#4BA609;">${{ sales_month|floatformat:0 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #dc3545!important;">
+      <div class="card-body">
+        <div class="text-muted small">Agotados</div>
+        <div class="fs-3 fw-bold text-danger">{{ out_of_stock }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #ffc107!important;">
+      <div class="card-body">
+        <div class="text-muted small">Stock Bajo</div>
+        <div class="fs-3 fw-bold text-warning">{{ low_stock }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-3 mb-4">
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Ventas por Mes</h6>
+        <canvas id="salesChart" height="90"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Inventario por Categoría</h6>
+        <canvas id="catChart" height="180"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tablas -->
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-bold border-0">Pedidos Recientes</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-light"><tr><th>Factura</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+          <tbody>
+            {% for order in recent_orders %}
+            <tr>
+              <td><small class="font-monospace">{{ order.invoice_number }}</small></td>
+              <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+              <td>${{ order.total|floatformat:0 }}</td>
+              <td><span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ order.get_status_display }}</span></td>
+            </tr>
+            {% empty %}<tr><td colspan="4" class="text-center text-muted py-3">Sin pedidos</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-bold border-0 d-flex justify-content-between">
+        <span>Productos con Stock Bajo</span>
+        <a href="{% url 'inventory_list' %}?status=low" class="small" style="color:#FD7B03;">Ver todos</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-light"><tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Mínimo</th></tr></thead>
+          <tbody>
+            {% for p in low_stock_products %}
+            <tr>
+              <td>{{ p.name }}</td>
+              <td><small class="text-muted">{{ p.category.name }}</small></td>
+              <td><span class="badge {% if p.stock == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ p.stock }}</span></td>
+              <td>{{ p.min_stock }}</td>
+            </tr>
+            {% empty %}<tr><td colspan="4" class="text-center text-muted py-3">Sin alertas</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const salesData = {{ monthly_sales|safe }};
+const catData = {{ categories|safe }};
+new Chart(document.getElementById('salesChart'), {
+  type: 'bar',
+  data: {
+    labels: salesData.map(d => d.month),
+    datasets: [{ label: 'Ventas ($)', data: salesData.map(d => d.total), backgroundColor: '#FD7B03', borderRadius: 6 }]
+  },
+  options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+});
+new Chart(document.getElementById('catChart'), {
+  type: 'doughnut',
+  data: {
+    labels: catData.map(d => d.name),
+    datasets: [{ data: catData.map(d => d.product_count), backgroundColor: ['#FD7B03','#4BA609','#0d6efd','#dc3545','#ffc107','#6f42c1'] }]
+  },
+  options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+});
+</script>
+{% endblock %}
